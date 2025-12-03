@@ -141,9 +141,9 @@ app.get("/soil", async (_req, res) => {
       {
         SERVICE: "report",
         REQUEST: "getreportdata",
-		REPORTID,
+		    REPORTID,
         AOIID,
-		FORMAT: "short"
+		    FORMAT: "short"
       },
       { headers: { "Content-Type": "application/json" } }
     );

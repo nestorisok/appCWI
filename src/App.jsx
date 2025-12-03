@@ -165,6 +165,11 @@ const HeaderNavBar = () => {
 const Home = () => {
 
 
+  // https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html
+  // Drawing polygon implementation
+
+  
+
   const [curLatLng, setCurLatLng] = useState('');
 
   useEffect(() => {
@@ -500,14 +505,6 @@ const CalcROI = () => {
       <div>
         <p>Outside levee: {leveeOutside.toFixed(2)} yds³</p>
       </div>
-
-    
-
-      {/*
-      ( (length + width) * 2 * (freeboard + waterDepth) * leveeTop/27 ) + ( (freeboard + waterDepth) * slopeInside * (freeboard + waterDepth) * (length + width) * 2/2/27 ) + ( (freeboard + waterDepth) * slopeOutside * (freeboard + waterDepth) * (length + width) * 2/2/27 )
-
-        Find a way to put together
-      */}
       
       <div>
         <p>Total: {(leveeCenter + leveeInside + leveeOutside).toFixed(2)} yds³</p>
