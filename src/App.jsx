@@ -167,9 +167,16 @@ const SoilData = ({fourCoords}) => {
 
 }
 
+function getCoords(layers) {
+  layers
+  var coordinates = layers.geometry.coordinates;
+  console.log(coordinates);
+}
+
 const Map = () => {
   const [curLatLng, setCurLatLng] = useState('');
   const mapInstanceRef = useRef(null);
+  const [mapPolygon, setMapPolygon] = useState([[0,0]])
 
     useEffect(() => {
 
@@ -208,12 +215,22 @@ const Map = () => {
     map.on("draw:created", function(e){
       var type = e.layerType;
       var layer = e.layer;
-      console.log("Plain layer:")
+      console.log("Plain layer: ")
       console.log(e);      
-      console.log("geoJSON layer:")
+      console.log("geoJSON layer: ")
       console.log(layer.toGeoJSON())
 
       layer.bindPopup(`<p>${JSON.stringify(layer.toGeoJSON())}</p>`)
+      console.log("Coordinates array: ")
+      console.log(layer.toGeoJSON().geometry.coordinates[0])
+      //console.log(layer.toGeoJSON().geometry.coordinates[0][1])
+
+      const coords = layer.toGeoJSON().geometry.coordinates[0];
+      setMapPolygon(coords)
+
+      console.log("Map polygon:")
+      console.log(coords)
+
       drawnItems.addLayer(layer);
 
     });
@@ -221,12 +238,20 @@ const Map = () => {
     map.on("draw:edited", function(e){
       var type = e.layerType;
       var layers = e.layers;
-
+      
       layers.eachLayer(function(layer){
         console.log(layer)
       })
+      const coords = layers.toGeoJSON().geometry.coordinates[0];
+      setMapPolygon(coords)
 
     })
+
+
+    map.on("draw:deleted", function(e) {
+      console.log("Shape deleted");
+      setMapPolygon([[0, 0]]); // Reset to default
+    });
     
     return(() => {
         map.remove();
