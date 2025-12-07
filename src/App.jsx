@@ -4,6 +4,7 @@ import L, { featureGroup, latLng, polygon } from "leaflet"
 import 'leaflet-draw'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
+import { LayersControl } from 'react-leaflet'
 //import parseAndSortSoils from "../server.js"
 
 
@@ -207,10 +208,25 @@ const Map = () => {
     map.on("draw:created", function(e){
       var type = e.layerType;
       var layer = e.layer;
-      console.log(e);
+      console.log("Plain layer:")
+      console.log(e);      
+      console.log("geoJSON layer:")
+      console.log(layer.toGeoJSON())
+
+      layer.bindPopup(`<p>${JSON.stringify(layer.toGeoJSON())}</p>`)
       drawnItems.addLayer(layer);
 
     });
+
+    map.on("draw:edited", function(e){
+      var type = e.layerType;
+      var layers = e.layers;
+
+      layers.eachLayer(function(layer){
+        console.log(layer)
+      })
+
+    })
     
     return(() => {
         map.remove();
