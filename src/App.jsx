@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 
-import L, { latLng } from "leaflet";
+import L, { featureGroup, latLng, polygon } from "leaflet"
+import 'leaflet-draw'
+
+//import parseAndSortSoils from "../server.js"
+
 
 {/*
   const BasinArea = ({pondSizeAC}) => {
@@ -169,12 +173,54 @@ const Home = () => {
   // Drawing polygon implementation
 
   
-
+  // Polygon testing
   const [curLatLng, setCurLatLng] = useState('');
+  const [drawnPolygon, setDrawnPolygon] = useState(null)
 
+  /*
+  useEffect(() => {
+     const map = L.map('map').setView([51.505, -0.09], 13);
+     L.tileLayer(`http://{s}.tile.osm.org/{z}/{x}/{y}.png`, {
+         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+     }).addTo(map);
+
+     // FeatureGroup is to store editable layers
+     // following causes issues 
+     var drawnItems = new L.FeatureGroup();
+     map.addLayer(drawnItems);
+     var drawControl = new L.Control.Draw({
+         edit: {
+             featureGroup: drawnItems
+         }
+     });
+     map.addControl(drawControl);
+
+
+     var modifiedDraw = L.drawLocal.extend({
+          draw: {
+            toolbar:{
+              buttons:{
+                polygon: 'Draw a polygon'
+              }
+            }
+          }
+
+
+     });
+    
+
+    return(() => {
+      map.remove();
+    });
+    
+  }, []);
+
+
+
+
+  /*
   useEffect(() => {
     const map = L.map(`map`).setView([51.505, -0.09], 13);
-
     L.tileLayer(`https://tile.openstreetmap.org/{z}/{x}/{y}.png`, {
       maxZoom: 19,
       attribution: `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>`
@@ -217,8 +263,42 @@ const Home = () => {
 
 
   }, []);
-  
+  */
 
+    useEffect(() => {
+    const map = L.map(`map`, {drawControl: true}).setView([51.505, -0.09], 13);
+    L.tileLayer(`https://tile.openstreetmap.org/{z}/{x}/{y}.png`, {
+      maxZoom: 19,
+      attribution: `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>`
+    }).addTo(map);
+
+    var drawnItems = new L.featureGroup();
+    map.addLayer(drawnItems);
+    var drawControl = new L.Control.Draw({
+        edit: {
+          featureGroup: drawnItems
+        }
+    });
+    map.addControl(drawControl);
+
+    // onClick popup coords
+    var popup = L.popup();
+    function onMapClick(e) {
+      popup
+            .setLatLng(e.latlng)
+            .setContent("You clicked the map at " + e.latlng.toString())
+            .openOn(map);
+      
+      setCurLatLng(e.latlng.toString())
+
+    }map.on('click', onMapClick);
+
+    return(() => {
+      map.remove();
+    });
+
+
+  }, []);
 
   return (
     <>
