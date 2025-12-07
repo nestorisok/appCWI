@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import L, { featureGroup, latLng, polygon } from "leaflet"
 import 'leaflet-draw'
-
+import 'leaflet/dist/leaflet.css'
+import 'leaflet-draw/dist/leaflet.draw.css'
 //import parseAndSortSoils from "../server.js"
 
 
@@ -133,17 +134,6 @@ const PageLogo = () => {
 }
 
 const HeaderNavBar = () => {
-  // useState for class
-  // const [active, setActive] = useState<number | undefined>();
-  // <div className="navBar">
-  //         <a href="#" className="active">Home</a>{/*Home*/}
-  //         <a href="./problem.html">Problem</a>{/*About the Problem*/}
-  //         <a href="./solution.html">Solution</a>{/*About the Solution*/}
-  //         <a href="./ROI.html">ROI</a>{/*Find your ROI*/}
-  //         <a href="./results.html">Results</a>{/*Results*/}
-  //         <a href="./who.html">Who are we?</a>{/*About CWI*/}
-  // </div>
-
 
   return (
     <>
@@ -164,6 +154,88 @@ const HeaderNavBar = () => {
 
 }
 
+const SoilData = ({fourCoords}) => {
+  const [soilData, setSoilData] = useState(null)
+  
+  const fetchSoilData = async () => {
+    if(!coordinates || coordinates.length < 4) {
+      console.log("Coordinates not yet set")
+      return;
+    }
+  }
+
+}
+
+const Map = () => {
+  const [curLatLng, setCurLatLng] = useState('');
+  const mapInstanceRef = useRef(null);
+
+    useEffect(() => {
+
+    if (mapInstanceRef.current) return;
+
+    mapInstanceRef.current = true;
+
+    const map = L.map('map').setView([36.773293, 240.051783], 15);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var drawnItems = new L.featureGroup();
+    map.addLayer(drawnItems);
+    
+    const drawControl = new L.Control.Draw({
+      position: "topleft",
+      edit: {
+        featureGroup: drawnItems,
+        remove: true
+      },
+      draw: {
+        polygon: true,
+        polyline: false,
+        rectangle: false,
+        circle: false,
+        circlemarker: false,
+        marker: false
+      }
+    })
+    map.addControl(drawControl)
+
+    // implement layers (?), need to keep track of coords
+    map.on("draw:created", function(e){
+      var type = e.layerType;
+      var layer = e.layer;
+      console.log(e);
+      drawnItems.addLayer(layer);
+
+    });
+    
+    return(() => {
+        map.remove();
+        mapInstanceRef.current = null;
+    });
+    }, []);
+
+  return(
+    <>
+        {/* <script 
+          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossOrigin="">            
+        </script> */}
+        <script 
+          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossOrigin="">            
+        </script> 
+        <div id="map"></div>
+        latLng:{curLatLng}
+
+    </>
+  )
+}
 
 
 const Home = () => {
@@ -174,131 +246,8 @@ const Home = () => {
 
   
   // Polygon testing
-  const [curLatLng, setCurLatLng] = useState('');
   const [drawnPolygon, setDrawnPolygon] = useState(null)
 
-  /*
-  useEffect(() => {
-     const map = L.map('map').setView([51.505, -0.09], 13);
-     L.tileLayer(`http://{s}.tile.osm.org/{z}/{x}/{y}.png`, {
-         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-     }).addTo(map);
-
-     // FeatureGroup is to store editable layers
-     // following causes issues 
-     var drawnItems = new L.FeatureGroup();
-     map.addLayer(drawnItems);
-     var drawControl = new L.Control.Draw({
-         edit: {
-             featureGroup: drawnItems
-         }
-     });
-     map.addControl(drawControl);
-
-
-     var modifiedDraw = L.drawLocal.extend({
-          draw: {
-            toolbar:{
-              buttons:{
-                polygon: 'Draw a polygon'
-              }
-            }
-          }
-
-
-     });
-    
-
-    return(() => {
-      map.remove();
-    });
-    
-  }, []);
-
-
-
-
-  /*
-  useEffect(() => {
-    const map = L.map(`map`).setView([51.505, -0.09], 13);
-    L.tileLayer(`https://tile.openstreetmap.org/{z}/{x}/{y}.png`, {
-      maxZoom: 19,
-      attribution: `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>`
-    }).addTo(map);
-
-    var marker = L.marker([51.5, -0.09]).addTo(map);
-
-    var circle = L.circle([51.508, -0.11], {
-        color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0.5,
-        radius: 500
-    }).addTo(map);
-
-    var polygon = L.polygon([
-        [51.509, -0.08],
-        [51.51, -0.047],
-        [51.503, -0.047],
-        [51.50, -0.077]
-
-    ]).addTo(map);
-
-    var popup = L.popup();
-    
-
-
-    function onMapClick(e) {
-      popup
-            .setLatLng(e.latlng)
-            .setContent("You clicked the map at " + e.latlng.toString())
-            .openOn(map);
-      
-      setCurLatLng(e.latlng.toString())
-
-    }map.on('click', onMapClick);
-
-    return(() => {
-      map.remove();
-    });
-
-
-  }, []);
-  */
-
-    useEffect(() => {
-    const map = L.map(`map`, {drawControl: true}).setView([51.505, -0.09], 13);
-    L.tileLayer(`https://tile.openstreetmap.org/{z}/{x}/{y}.png`, {
-      maxZoom: 19,
-      attribution: `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>`
-    }).addTo(map);
-
-    var drawnItems = new L.featureGroup();
-    map.addLayer(drawnItems);
-    var drawControl = new L.Control.Draw({
-        edit: {
-          featureGroup: drawnItems
-        }
-    });
-    map.addControl(drawControl);
-
-    // onClick popup coords
-    var popup = L.popup();
-    function onMapClick(e) {
-      popup
-            .setLatLng(e.latlng)
-            .setContent("You clicked the map at " + e.latlng.toString())
-            .openOn(map);
-      
-      setCurLatLng(e.latlng.toString())
-
-    }map.on('click', onMapClick);
-
-    return(() => {
-      map.remove();
-    });
-
-
-  }, []);
 
   return (
     <>
@@ -338,24 +287,9 @@ const Home = () => {
       </div>
 
       <div className = "infoContainer">
+
         <h1>Map</h1>
-        <div id="map"></div>
-        latLng:{curLatLng}
-        <script 
-          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin="">
-
-            
-        </script>
-
-        {/* <script>
-          const map = L.map('map').setView([51.505, -0.09], 13);
-          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          }).addTo(map);
-        </script> */}
+        <Map/>
 
       </div>
 
@@ -558,6 +492,15 @@ const CalcROI = () => {
           />
       </label>
 
+      <label>
+        Soil type:
+        <select>
+          <option>Option 1</option>
+          <option>Option 2</option>
+          <option>Option 3</option>
+        </select>
+      </label>
+
 
       
     </div>
@@ -643,7 +586,6 @@ function App() {
 
   return (
     <>
-      <div className="blurryBackground"> </div>
 
       <div className="bodyContainer">
         {/*<div className="blurryBackground"> </div> fix this*/} 

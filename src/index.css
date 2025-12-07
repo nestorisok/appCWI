@@ -180,5 +180,8 @@ text-align: left;
 }
 
 #map { 
-height: 360px; 
+height: 640px; 
+width: 100%;
+touch-action: none;
+position: relative;
 }
