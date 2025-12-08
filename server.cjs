@@ -46,13 +46,37 @@ function parseAndSortSoils(reportJSON) {
   }
 }
 
-app.get("/", (_req, res) => res.send("Soil API running"));
+app.get("/", (req, res) => res.send("Soil API running"));
 
-app.get("/soil", async (_req, res) => {
+app.get("/soil", async (req, res) => {
   try {
+    /* Attempt to get req */
+    const { coordinates } = req.query;
+
+    console.log("Recieved coords: ", req.query)
+
+    let parsedCoords;
+    parsedCoords = JSON.parse(coordinates)
+
+    const newRing = [...parsedCoords]
+
+    //const firstPoint = newRing[0]
+    //const last = newRing[newRing.length - 1];
+    
     // Hard coded 40 acres in NW of Fresno (lon, lat). 
 	// GeoJSON needs the ring closed so make sure the first and last entries match.
 	// Retrieve real values from a map api.
+  /*
+  [[
+    [-119.951692,36.764061],
+    [-119.943303,36.764026],
+    [-119.943325,36.750176],
+    [-119.951607,36.74997],
+    [-119.951692,36.764061]
+  ]]
+    */
+
+  /*
     const ring = [
       [-119.7178, 36.7508],
       [-119.7130, 36.7508],
@@ -60,6 +84,7 @@ app.get("/soil", async (_req, res) => {
       [-119.7178, 36.7488],
       [-119.7178, 36.7508] // close ring
     ]
+      */
     // Build GeoJSON (FeatureCollection is recommended; properties can be used with FILTER later)
     const geojson = {
       type: "FeatureCollection",
@@ -69,7 +94,8 @@ app.get("/soil", async (_req, res) => {
           properties: { name: "Fresno Demo Field" },
           geometry: {
             type: "Polygon",
-            coordinates: [ring] // IMPORTANT: [ [ [lon,lat], ... ] ]
+            //coordinates: [ring] // IMPORTANT: [ [ [lon,lat], ... ] ]
+            coordinates: [newRing]
           }
         }
       ]

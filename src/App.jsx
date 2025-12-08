@@ -155,36 +155,75 @@ const HeaderNavBar = () => {
 
 }
 
-const SoilData = ({fourCoords}) => {
-  const [soilData, setSoilData] = useState(null)
-  
+const SoilData = ({mapPolygon}) => {
+  const [soilData, setSoilData] = useState(null);
+
+  console.log("SoilData mapPolygon: ", mapPolygon)
+
   const fetchSoilData = async () => {
-    if(!coordinates || coordinates.length < 4) {
-      console.log("Coordinates not yet set")
+    if (!mapPolygon || mapPolygon.length < 3 || 
+        (mapPolygon.length === 1 && mapPolygon[0][0] === 0)) {
+      console.log("Coordinates not yet set");
       return;
     }
-  }
 
-}
+      const coordsParam = encodeURIComponent(JSON.stringify(mapPolygon));
+      const response = await fetch(`http://localhost:5000/soil?coordinates=${coordsParam}`, {
+        method: "GET",
+      });
 
-function getCoords(layers) {
-  layers
-  var coordinates = layers.geometry.coordinates;
-  console.log(coordinates);
-}
+      const responseText = await response.text();
+      let data = JSON.parse(responseText);
+      setSoilData(data);
+      console.log("Soil data received:", data);
+      
+
+  };
+  
+    return (
+    <div className="soilDataContainer">
+      <button onClick={fetchSoilData} >
+        {"Get Soil Data"}
+      </button>
+      
+      
+      {soilData && (
+        <div>
+          <h3>Soil Information</h3>
+          <p><strong>Primary Soil Type:</strong> {soilData.topSoil}</p>
+          <p><strong>Primary Soil Type:</strong> {soilData}</p>
+          
+          {soilData.allSoils && (
+            <div>
+              <h4>All Soil Types:</h4>
+              <ul>
+                {soilData.allSoils.map((soil, idx) => (
+                  <li key={idx}>
+                    {soil.symbol} - {soil.desc} ({soil.acres.toFixed(2)} acres)
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 const Map = () => {
-  const [curLatLng, setCurLatLng] = useState('');
   const mapInstanceRef = useRef(null);
   const [mapPolygon, setMapPolygon] = useState([[0,0]])
+
+
 
     useEffect(() => {
 
     if (mapInstanceRef.current) return;
-
     mapInstanceRef.current = true;
 
-    const map = L.map('map').setView([36.773293, 240.051783], 15);
+    const map = L.map('map').setView([36.764061,-119.951692], 15);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -215,6 +254,8 @@ const Map = () => {
     map.on("draw:created", function(e){
       var type = e.layerType;
       var layer = e.layer;
+      
+      /*
       console.log("Plain layer: ")
       console.log(e);      
       console.log("geoJSON layer: ")
@@ -224,12 +265,12 @@ const Map = () => {
       console.log("Coordinates array: ")
       console.log(layer.toGeoJSON().geometry.coordinates[0])
       //console.log(layer.toGeoJSON().geometry.coordinates[0][1])
-
+      */
       const coords = layer.toGeoJSON().geometry.coordinates[0];
       setMapPolygon(coords)
 
       console.log("Map polygon:")
-      console.log(coords)
+      console.log(mapPolygon)
 
       drawnItems.addLayer(layer);
 
@@ -261,19 +302,18 @@ const Map = () => {
 
   return(
     <>
-        {/* <script 
-          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossOrigin="">            
-        </script> */}
+
         <script 
           src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossOrigin="">            
         </script> 
         <div id="map"></div>
-        latLng:{curLatLng}
+        Coords:{"[" + mapPolygon + "]"}
+        {console.log("Map func:")}
+        {console.log(mapPolygon)}
 
+        <SoilData mapPolygon={mapPolygon} />
     </>
   )
 }
@@ -368,7 +408,7 @@ const PageFooter = () => {
 )
 }
 
-const CalcROI = () => {
+const CalcROI = ({soilType}) => {
   const [pondSizeAC, setPondSizeAC] = useState(0);
   const [length, setLength] = useState(0);
   const [width, setWidth] = useState(0);
@@ -446,7 +486,8 @@ const CalcROI = () => {
       setWettedArea(value || 0); // 0 if empty
       }, [outsideLength, lessOutsideLevee, lessTop, lessInsideLevee, plusWettedInsideLevee]);
   
-  return (
+
+    return (
   <>
     <div className="calcContainer">
       <h1>ROI Calculator</h1>
@@ -535,11 +576,7 @@ const CalcROI = () => {
 
       <label>
         Soil type:
-        <select>
-          <option>Option 1</option>
-          <option>Option 2</option>
-          <option>Option 3</option>
-        </select>
+        {soilType || " Draw a polygon on the map to retrieve soil type"}
       </label>
 
 
