@@ -75,7 +75,7 @@ const SoilData = ({mapPolygon}) => {
           {/* <p><strong>Primary Soil Type:</strong> {soilData.topSoil}</p> */}
           <p><strong>Primary Soil Type:</strong> {soilData}</p>
           
-          {soilData.allSoils && (
+          {/* soilData.allSoils && (
             <div>
               <h4>All Soil Types:</h4>
               <ul>
@@ -86,7 +86,7 @@ const SoilData = ({mapPolygon}) => {
                 ))}
               </ul>
             </div>
-          )}
+          ) */}
         </div>
       )}
     </div>
@@ -191,7 +191,11 @@ const Map = () => {
           crossOrigin="">            
         </script> 
         <div id="map"></div>
-        {/* Coords:{"[" + mapPolygon + "]"} */}
+        <div>
+          Coords:{mapPolygon.map((coord, ind) => (
+            <div key={ind}>[{coord[0]}, {coord[1]}]</div>
+          ))}
+          </div>
         {console.log("Map func:")}
         {console.log(mapPolygon)}
 
@@ -458,7 +462,7 @@ const CalcROI = ({soilType}) => {
 
       <label>
         Soil type:
-        {soilType || " Draw a polygon on the map to retrieve soil type"}
+        {soilType}
       </label>
 
 
@@ -496,42 +500,43 @@ const CalcROI = ({soilType}) => {
       <div>
         <p>Cost: ${((leveeCenter + leveeInside + leveeOutside) * 12).toFixed(2)}</p> 
       </div>
-
-      <h2>Wetted Area</h2>
       <div>
-        <p>Outside length: {outsideLength} ft</p>
-      </div>
+        <h2>Wetted Area</h2>
+        <div>
+          <p>Outside length: {outsideLength} ft</p>
+        </div>
 
-      <div>
-        <p>Less outside levee: {lessOutsideLevee} ft</p>
-      </div>
+        <div>
+          <p>Less outside levee: {lessOutsideLevee} ft</p>
+        </div>
 
-      <div>
-        <p>Less top: {lessTop} ft</p>
-      </div>
+        <div>
+          <p>Less top: {lessTop} ft</p>
+        </div>
 
-      <div>
-        <p>Less inside levee: {lessInsideLevee} ft</p>
-      </div>
+        <div>
+          <p>Less inside levee: {lessInsideLevee} ft</p>
+        </div>
 
-      <div>
-        <p>Plus wetted inside levee: {plusWettedInsideLevee} ft</p>
-      </div>
+        <div>
+          <p>Plus wetted inside levee: {plusWettedInsideLevee} ft</p>
+        </div>
 
-      <div>
-        <p>Net inside length: {netInsideLength} ft</p>
-      </div>
+        <div>
+          <p>Net inside length: {netInsideLength} ft</p>
+        </div>
 
-      <div>
-        <p>Wetted area: { wettedArea.toFixed(3)} yds²</p>
-      </div>
+        <div>
+          <p>Wetted area: { wettedArea.toFixed(3)} yds²</p>
+        </div>
 
-      <div>
-        <p>{(wettedArea / 4840).toFixed(4)} Acres</p>
-      </div>
+        <div>
+          <p>{(wettedArea / 4840).toFixed(4)} Acres</p>
+        </div>
 
-     <div>
-        <p>{( ((wettedArea / 4840) / pondSizeAC).toFixed(2) ) * 100 }% of gross Acres</p>
+        <div>
+          <p>{( ((wettedArea / 4840) / pondSizeAC).toFixed(2) ) * 100 }% of gross Acres</p>
+        </div>
       </div>
     </div>
 

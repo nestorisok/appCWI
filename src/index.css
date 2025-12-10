@@ -14,8 +14,7 @@
 
 .bodyContainer {
     min-width: 650px;
-
-    
+    text-align: center;
 
 }
 
@@ -180,8 +179,7 @@ text-align: left;
 }
 
 #map { 
-height: 640px; 
+height: 440px; 
 width: 100%;
-touch-action: none;
 position: relative;
 }
