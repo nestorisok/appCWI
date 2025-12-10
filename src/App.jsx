@@ -4,124 +4,6 @@ import L, { featureGroup, latLng, polygon } from "leaflet"
 import 'leaflet-draw'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
-import { LayersControl } from 'react-leaflet'
-//import parseAndSortSoils from "../server.js"
-
-
-{/*
-  const BasinArea = ({pondSizeAC}) => {
-    // ac pond / 640 = sqMiles
-    return (
-      <>
-      <div>
-        <p>Pond Size: {pondSizeAC / 640} square miles</p>
-      </div>
-      </>
-    )
-
-  }
-
-  const basinPerim = () => {
-    // (ft long side * 2) + (ft short side * 2) = perimeter in ft
-    return (
-      <>
-      <div>
-        <p>Pond Size: {pondSizeAC / 640} square miles</p>
-      </div>
-      </>
-    )
-  }
-
-  // Volume of earthwork
-  const leveeCenter = () => {
-    // (longSideFt + shortSideFt) * 2 * (freeboardFt + waterDepthFt) * leveeTopFt / 27
-    // returns cu yds
-      return (
-      <>
-      <div>
-        <p>Pond Size: {pondSizeAC / 640} square miles</p>
-      </div>
-      </>
-    )
-  }
-  
-
-  const leveeInside = () => {
-    // (freeboardFt + waterDepthFt) * slopeInside * (freeboardFt + waterDepthFt) * (longSideFt + shortSideFt) * 2 / 2 / 27
-    // returns cu yds
-  }
-
-  const leveeOutside = () => {
-    // (freeboardFt + waterDepthFt) * slopeOutside * (freeboardFt + waterDepthFt) * (longSideFt + shortSideFt) * 2 / 2 / 27
-    // returns cu yds
-  }
-
-
-  const EarthworkTotVol = () => {
-    // int totCuYds = leveeCenter + leveeInside + leveeOutside
-
-    // return totCuYds
-  }
-
-  const EarthworkTotCost = () => {
-    // int totCost = totVolEarthwork * earthworkCostCuYds
-    //     totCost = X * $12
-  }
-  
-  const WettedOutsideLength = () => {
-    // int outsideLengthFt = basinPerim / 4;
-
-  }
-
-  const lessOutsideLevee = () => {
-    // int totFt = (freeboardFt + waterDepthFt) * slopeOutside * 2
-
-  }
-
-  const lessTop = () => {
-    // int totFt = leveeTop * 2
-
-  }
-
-  const lessInsideLevee = () => {
-    // int totFt = (freeboardFt + waterDepthFt) * slopeInside * 2
-  }
-
-  const wettedInsideLevee = () => {
-    // int totFt = waterDepthFt * slopeInside * 2
-
-  }
-
-  const netInsideLength = () => {
-    // int totFt = wettedOutsideLength() - (lessOutsideLevee + lessTop + lessInsideLevee) + wettedInsideLevee
-  }
-
-  const totWettedAreaSqYds = () => {
-    // int totSqYds = (netInsideLength * netInsideLength) / 9
-  }
-
-  const totWettedAreaAcres = () => {
-    // int totAcres = totWettedAreaSqYds / 4840
-  }
-
-
-  const grossAc = () => {
-    // int grossAc = totWettedAreaAcres / basinAcPond
-  }
-
-
-const PageTitle = () => {
-  return (
-    <>
-      <div className="pageHeader">
-        <h1>California Water Institute</h1>
-      </div>
-    </>
-  )
-
-
-}
-*/}
 
 
 const PageLogo = () => {
@@ -190,7 +72,7 @@ const SoilData = ({mapPolygon}) => {
       {soilData && (
         <div>
           <h3>Soil Information</h3>
-          <p><strong>Primary Soil Type:</strong> {soilData.topSoil}</p>
+          {/* <p><strong>Primary Soil Type:</strong> {soilData.topSoil}</p> */}
           <p><strong>Primary Soil Type:</strong> {soilData}</p>
           
           {soilData.allSoils && (
@@ -309,7 +191,7 @@ const Map = () => {
           crossOrigin="">            
         </script> 
         <div id="map"></div>
-        Coords:{"[" + mapPolygon + "]"}
+        {/* Coords:{"[" + mapPolygon + "]"} */}
         {console.log("Map func:")}
         {console.log(mapPolygon)}
 
