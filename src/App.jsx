@@ -28,7 +28,7 @@ const HeaderNavBar = () => {
             <a href="#problem">Problem</a>{/*About the Problem*/}
             <a href="#solution">Solution</a>{/*About the Solution*/}
             <a href="#roi">ROI</a>{/*Find your ROI*/}
-            <a href="#roi">Results</a>{/*Results*/}
+            <a href="#calcResults">Results</a>{/*Results*/}
             <a href="#who">Who are we?</a>{/*About CWI*/}
     </div>
     {/*       Navbar ended        */}
@@ -50,8 +50,8 @@ const getFieldInfo = (layer) => {
   return { acres: areaM2 / 4046.856, perimeterFt: perimeterM * 3.28084, center: [c.lat, c.lng] };
 }
 
-const SoilData = ({mapPolygon}) => {
-  const [soilData, setSoilData] = useState(null);
+const SoilData = ({mapPolygon, soilData, setSoilData}) => {
+  //const [soilData, setSoilData] = useState(null);
 
   console.log("SoilData mapPolygon: ", mapPolygon)
 
@@ -97,7 +97,7 @@ const popupHtml = (info, soilType, coords) => `
   Center: ${info.center[0].toFixed(5)}, ${info.center[1].toFixed(5)}<br/>
   Area: ${info.acres.toFixed(2)} acres<br/>
   Perimeter: ${info.perimeterFt.toFixed(0)} ft<br/>
-  Soil type: ${soilType ?? "<i>Get Soil Data</i>"}<br/>
+  Soil type: ${soilType ?? "<i>click Get Soil Data</i>"}<br/>
   <details>
     <summary>${coords.length - 1} corners</summary>
     ${coords.slice(0, -1).map(([lng, lat]) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`).join("<br/>")}
@@ -201,7 +201,8 @@ const Map = ({soilType, setSoilType}) => {
           src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossOrigin="">            
-        </script> 
+        </script>
+        
         <div id="map"></div>
 
           {fieldInfo ? (
@@ -209,7 +210,7 @@ const Map = ({soilType, setSoilType}) => {
               <h3>Field summary</h3>
               <p><strong>Area:</strong> {fieldInfo.acres.toFixed(2)} acres</p>
               <p><strong>Perimeter:</strong> {fieldInfo.perimeterFt.toFixed(0)} ft</p>
-              <p><strong>Center:</strong> {fieldInfo.center[0].toFixed(5)}, {fieldInfo.center[1].toFixed(5)} acres</p>
+              <p><strong>Center:</strong> {fieldInfo.center[0].toFixed(5)}, {fieldInfo.center[1].toFixed(5)}</p>
               <details>
                 <summary>{mapPolygon.length - 1} corners (lat,lng)</summary>
                 {mapPolygon.slice(0, -1).map(([lng, lat], ind) => (
@@ -561,7 +562,7 @@ const CalcROI = ({soilType}) => {
         </div>
 
         <div>
-          <p>{pondSizeAC > 0 ? ((wettedArea / 4840) / pondSizeAC).toFixed(2) : 0}% of gross Acres</p>
+          <p>{pondSizeAC > 0 ? ((wettedArea / 4840) / pondSizeAC * 100).toFixed(2) : 0}% of gross Acres</p>
         </div>
       </div>
     </div>
