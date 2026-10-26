@@ -5,12 +5,14 @@ import 'leaflet-draw'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
 
+import fsLogo from './assets/fs-logo-color-stacked.jpg'
+import fresnoAg from './assets/fresnoAg.jpg'
 
 const PageLogo = () => {
   return (
   <>
     <div>
-      <img src='./src/assets/fs-logo-color-stacked.jpg' className="headerLogo"/>
+      <img src={fsLogo} className="headerLogo"/>
     </div>
   </>
   )
@@ -35,6 +37,17 @@ const HeaderNavBar = () => {
   )
 
 
+}
+
+const getFieldInfo = (layer) => {
+  const latlngs = layer.getLatLngs()[0];
+  const areaM2 = L.GeometryUtil.geodesicArea(latlngs);
+  let perimeterM = 0;
+  for (let i = 0; i < latlngs.length; i++){
+    perimeterM += latlngs[i].distanceTo(latlngs[(i + 1) % latlngs.length]);
+  }
+  const c = layer.getBounds().getCenter();
+  return { acres: areaM2 / 4046.856, perimeterFt: perimeterM * 3.28084, center: [c.lat, c.lng] };
 }
 
 const SoilData = ({mapPolygon}) => {
@@ -72,33 +85,35 @@ const SoilData = ({mapPolygon}) => {
       {soilData && (
         <div>
           <h3>Soil Information</h3>
-          {/* <p><strong>Primary Soil Type:</strong> {soilData.topSoil}</p> */}
           <p><strong>Primary Soil Type:</strong> {soilData}</p>
-          
-          {/* soilData.allSoils && (
-            <div>
-              <h4>All Soil Types:</h4>
-              <ul>
-                {soilData.allSoils.map((soil, idx) => (
-                  <li key={idx}>
-                    {soil.symbol} - {soil.desc} ({soil.acres.toFixed(2)} acres)
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) */}
         </div>
       )}
     </div>
   );
 };
 
+const popupHtml = (info, soilType, coords) => `
+  <b>Field</b><br />
+  Center: ${info.center[0].toFixed(5)}, ${info.center[1].toFixed(5)}<br/>
+  Area: ${info.acres.toFixed(2)} acres<br/>
+  Perimeter: ${info.perimeterFt.toFixed(0)} ft<br/>
+  Soil type: ${soilType ?? "<i>Get Soil Data</i>"}<br/>
+  <details>
+    <summary>${coords.length - 1} corners</summary>
+    ${coords.slice(0, -1).map(([lng, lat]) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`).join("<br/>")}
+  </details>
+`
 
-const Map = () => {
+const Map = ({soilType, setSoilType}) => {
   const mapInstanceRef = useRef(null);
+  const layerRef = useRef(null); // popUp field
+  const [fieldInfo, setFieldInfo] = useState(null)
   const [mapPolygon, setMapPolygon] = useState([[0,0]])
 
-
+  useEffect(() => {
+    if (!layerRef.current || !fieldInfo) return;
+    layerRef.current.bindPopup(popupHtml(fieldInfo, soilType, mapPolygon)).openPopup();
+  }, [fieldInfo, soilType, mapPolygon]);
 
     useEffect(() => {
 
@@ -137,24 +152,17 @@ const Map = () => {
       var type = e.layerType;
       var layer = e.layer;
       
-      /*
-      console.log("Plain layer: ")
-      console.log(e);      
-      console.log("geoJSON layer: ")
-      console.log(layer.toGeoJSON())
-
-      layer.bindPopup(`<p>${JSON.stringify(layer.toGeoJSON())}</p>`)
-      console.log("Coordinates array: ")
-      console.log(layer.toGeoJSON().geometry.coordinates[0])
-      //console.log(layer.toGeoJSON().geometry.coordinates[0][1])
-      */
       const coords = layer.toGeoJSON().geometry.coordinates[0];
       setMapPolygon(coords)
 
       console.log("Map polygon:")
       console.log(mapPolygon)
 
+      drawnItems.clearLayers();
       drawnItems.addLayer(layer);
+      layerRef.current = layer;
+      setFieldInfo(getFieldInfo(layer));
+      setSoilType(null);
 
     });
 
@@ -163,10 +171,11 @@ const Map = () => {
       var layers = e.layers;
       
       layers.eachLayer(function(layer){
-        console.log(layer)
+        setMapPolygon(layer.toGeoJSON().geometry.coordinates[0])
+        setFieldInfo(getFieldInfo(layer))
+        setSoilType(null)
+        //console.log(layer)
       })
-      const coords = layers.toGeoJSON().geometry.coordinates[0];
-      setMapPolygon(coords)
 
     })
 
@@ -174,6 +183,9 @@ const Map = () => {
     map.on("draw:deleted", function(e) {
       console.log("Shape deleted");
       setMapPolygon([[0, 0]]); // Reset to default
+      layerRef.current = null;
+      setFieldInfo(null);
+      setSoilType(null);
     });
     
     return(() => {
@@ -191,15 +203,26 @@ const Map = () => {
           crossOrigin="">            
         </script> 
         <div id="map"></div>
-        <div>
-          Coords:{mapPolygon.map((coord, ind) => (
-            <div key={ind}>[{coord[0]}, {coord[1]}]</div>
-          ))}
-          </div>
+
+          {fieldInfo ? (
+            <div className="fieldSummary">
+              <h3>Field summary</h3>
+              <p><strong>Area:</strong> {fieldInfo.acres.toFixed(2)} acres</p>
+              <p><strong>Perimeter:</strong> {fieldInfo.perimeterFt.toFixed(0)} ft</p>
+              <p><strong>Center:</strong> {fieldInfo.center[0].toFixed(5)}, {fieldInfo.center[1].toFixed(5)} acres</p>
+              <details>
+                <summary>{mapPolygon.length - 1} corners (lat,lng)</summary>
+                {mapPolygon.slice(0, -1).map(([lng, lat], ind) => (
+                  <div key={ind}>{lat.toFixed(5)}, {lng.toFixed(5)}</div>
+                ))}
+              </details>
+            </div>
+          ) : (
+            <p>Draw your field on the map with the polygon tool</p>
+          )}
         {console.log("Map func:")}
         {console.log(mapPolygon)}
-
-        <SoilData mapPolygon={mapPolygon} />
+        <SoilData mapPolygon={mapPolygon} soilData={soilType} setSoilData={setSoilType} />
     </>
   )
 }
@@ -215,11 +238,14 @@ const Home = () => {
   // Polygon testing
   const [drawnPolygon, setDrawnPolygon] = useState(null)
 
+  // Shared between map and ROI calc (short for calculator)
+  const [soilType, setSoilType] = useState(null)
+
 
   return (
     <>
       <div className="imgContainer">
-        <img src="./src/assets/fresnoAg.jpg"/>
+        <img src={fresnoAg}/>
       
           <div className="imgCaption">
             <h1>California Water Institute</h1>
@@ -256,12 +282,12 @@ const Home = () => {
       <div className = "infoContainer">
 
         <h1>Map</h1>
-        <Map/>
+        <Map soilType={soilType} setSoilType={setSoilType}/>
 
       </div>
 
       <div className = "infoContainer" id ='roi'>
-        <CalcROI />
+        <CalcROI soilType={soilType}/>
       </div>
 
 
@@ -535,7 +561,7 @@ const CalcROI = ({soilType}) => {
         </div>
 
         <div>
-          <p>{( ((wettedArea / 4840) / pondSizeAC).toFixed(2) ) * 100 }% of gross Acres</p>
+          <p>{pondSizeAC > 0 ? ((wettedArea / 4840) / pondSizeAC).toFixed(2) : 0}% of gross Acres</p>
         </div>
       </div>
     </div>
